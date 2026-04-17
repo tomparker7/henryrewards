@@ -151,6 +151,9 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       <button class="action-btn btn-earn" onclick="confirm_action('bed_extra','Extra bed night 🛏️','Volunteered to sleep extra night in own bed','earn',2)">
         <span class="icon">🛏️</span><span class="label">Extra bed night</span><span class="pts">+2</span>
       </button>
+      <button class="action-btn btn-earn" onclick="confirm_action('chore','House chore 🧹','Completed a house chore','earn',1)">
+        <span class="icon">🧹</span><span class="label">House chore</span><span class="pts">+1</span>
+      </button>
       <button class="action-btn btn-super" onclick="confirm_action('super','SUPER BONUS 🦸','No thumb sucking all day AND night!','earn',10)">
         <span class="icon">🦸</span><span class="label">Super Bonus — no thumb sucking all day &amp; night!</span><span class="pts">+10 pts!</span>
       </button>
@@ -168,6 +171,9 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       </button>
       <button class="action-btn btn-spend" onclick="spend_action('ice','Shaved ice 🧊','Shaved ice with flavor',2)">
         <span class="icon">🧊</span><span class="label">Shaved ice</span><span class="pts">2 pts</span>
+      </button>
+      <button class="action-btn btn-spend" onclick="spend_action('soda','Soda 🥤','A soda',2)">
+        <span class="icon">🥤</span><span class="label">Soda</span><span class="pts">2 pts</span>
       </button>
       <button class="action-btn btn-spend" onclick="spend_action('bed','Dad\'s bed 🛏️','Bought out his-bed night',3)">
         <span class="icon">😴</span><span class="label">Dad's bed</span><span class="pts">3 pts</span>
@@ -222,7 +228,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 
 <script>
 const MILESTONES=[{pts:10,cash:'$5'},{pts:20,cash:'$12'},{pts:50,cash:'$30'},{pts:100,cash:'$100 🎉'}];
-const ICONS={candy:'🍬',thumb:'👍',teeth_n:'🌙',teeth_m:'☀️',bed_extra:'🛏️',super:'🦸',remind_n:'😬',remind_m:'😬',bed_exit:'🚶',climb:'🛋️',candy_extra:'🍬',popcorn:'🍿',ice:'🧊',bed:'😴',feast:'🍫'};
+const ICONS={candy:'🍬',thumb:'👍',teeth_n:'🌙',teeth_m:'☀️',bed_extra:'🛏️',chore:'🧹',super:'🦸',remind_n:'😬',remind_m:'😬',bed_exit:'🚶',climb:'🛋️',candy_extra:'🍬',popcorn:'🍿',ice:'🧊',soda:'🥤',bed:'😴',feast:'🍫'};
 let state={entries:[],totalEarned:0,totalSpent:0};
 let pending=null,toastTimer=null;
 
