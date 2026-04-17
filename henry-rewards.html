@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Henry's Rewards">
+<title>Henry's Rewards</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#6A0DAD;--gold:#e6b800;--teal:#007070;--green:#1e7a3e;
+  --red:#b02020;--orange:#c05e00;--blue:#1a5fa0;
+  --bg:#f3eeff;--card:#fff;--text:#1a1a2e;--muted:#555;
+  --radius:16px;
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:48px}
+.app{max-width:430px;margin:0 auto;padding:0 12px}
+
+.header{background:var(--purple);border-radius:0 0 28px 28px;padding:20px 20px 24px;text-align:center;margin-bottom:20px}
+.header h1{font-family:'Fredoka One',cursive;font-size:26px;color:#FFD700;letter-spacing:1px}
+.header p{color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px}
+
+.balance-card{background:var(--purple);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px}
+.balance-label{font-size:12px;color:rgba(255,255,255,0.8);font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.balance-number{font-family:'Fredoka One',cursive;font-size:68px;color:#FFD700;line-height:1;transition:transform 0.3s cubic-bezier(.34,1.56,.64,1)}
+.balance-number.pop{transform:scale(1.2)}
+.balance-unit{font-size:16px;color:rgba(255,255,255,0.75);font-weight:800;margin-top:2px}
+.balance-sub{display:flex;justify-content:center;gap:24px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.2)}
+.balance-sub-item .lbl{font-size:11px;color:rgba(255,255,255,0.65);font-weight:800;text-transform:uppercase}
+.balance-sub-item .val{font-size:20px;font-weight:800;color:#fff;text-align:center}
+
+.milestone-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:16px;border:2px solid #e0d4f7}
+.milestone-title{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.milestone-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.milestone-dot{width:28px;height:28px;border-radius:50%;background:#e8e8e8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;color:#888}
+.milestone-dot.reached{background:#FFD700;color:#5a3d00}
+.milestone-dot.next{background:var(--purple);color:#fff;animation:pulse 2s infinite}
+.milestone-info{flex:1}
+.milestone-info .pts{font-size:13px;font-weight:800;color:var(--text)}
+.milestone-info .cash{font-size:12px;color:var(--muted);font-weight:700}
+.milestone-info .reached-lbl{font-size:12px;color:var(--green);font-weight:800}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(106,13,173,.4)}50%{box-shadow:0 0 0 6px rgba(106,13,173,0)}}
+
+.section{background:var(--card);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;border:2px solid #e8e8e8}
+.section-header{padding:13px 16px 11px;font-family:'Fredoka One',cursive;font-size:18px}
+.section-header.earn{color:#fff;background:var(--green)}
+.section-header.spend{color:#fff;background:var(--blue)}
+.section-header.deduct{color:#fff;background:var(--red)}
+
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.action-btn{border:none;border-radius:14px;padding:14px 10px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .15s;min-height:84px;justify-content:center;-webkit-tap-highlight-color:transparent}
+.action-btn:active{transform:scale(.93)}
+.action-btn .icon{font-size:26px;line-height:1}
+.action-btn .label{line-height:1.2;text-align:center}
+.action-btn .pts{font-size:17px;font-weight:800;margin-top:2px}
+
+.btn-earn{background:#d4f0dc;color:#0d4a22;border:2px solid #a8dbb7}
+.btn-super{background:#FFD700;color:#3d2800;border:2px solid #c9a800;grid-column:1/-1}
+.btn-spend{background:#d4e8f8;color:#0a2e52;border:2px solid #a0c8ee}
+.btn-deduct{background:#fad4d4;color:#4a0d0d;border:2px solid #f0a8a8}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:24px;padding:28px 24px;max-width:320px;width:100%;text-align:center;transform:scale(.85);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.modal-overlay.show .modal{transform:scale(1)}
+.modal .modal-icon{font-size:52px;margin-bottom:10px}
+.modal h3{font-family:'Fredoka One',cursive;font-size:22px;color:var(--purple);margin-bottom:8px}
+.modal p{font-size:14px;color:#444;line-height:1.5;margin-bottom:20px;white-space:pre-line}
+.modal-btns{display:flex;gap:10px}
+.modal-btns button{flex:1;padding:14px;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:transform .15s}
+.modal-btns button:active{transform:scale(.95)}
+.btn-confirm{background:var(--purple);color:#fff}
+.btn-cancel{background:#eee;color:#555}
+
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--purple);color:#fff;padding:12px 24px;border-radius:40px;font-weight:800;font-size:14px;white-space:nowrap;z-index:200;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.log-section{background:var(--card);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;border:2px solid #e8e8e8}
+.log-header{padding:13px 16px;font-family:'Fredoka One',cursive;font-size:18px;color:var(--purple);border-bottom:2px solid #f0ebff;display:flex;justify-content:space-between;align-items:center}
+.log-clear{font-size:12px;font-weight:800;color:#fff;background:var(--red);border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:'Nunito',sans-serif}
+.log-empty{padding:24px;text-align:center;color:var(--muted);font-size:14px;font-weight:700}
+.log-entry{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #f5f5f5}
+.log-entry:last-child{border-bottom:none}
+.log-entry .entry-icon{font-size:20px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;flex-shrink:0}
+.entry-earn .entry-icon{background:#d4f0dc}
+.entry-spend .entry-icon{background:#d4e8f8}
+.entry-deduct .entry-icon{background:#fad4d4}
+.log-entry .entry-info{flex:1;min-width:0}
+.log-entry .entry-desc{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log-entry .entry-date{font-size:11px;color:var(--muted);margin-top:1px;font-weight:700}
+.log-entry .entry-pts{font-family:'Fredoka One',cursive;font-size:18px;flex-shrink:0}
+.entry-earn .entry-pts{color:var(--green)}
+.entry-spend .entry-pts{color:var(--blue)}
+.entry-deduct .entry-pts{color:var(--red)}
+
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:300;overflow:hidden}
+.confetto{position:absolute;width:9px;height:9px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>⭐ Henry's Rewards ⭐</h1>
+    <p>Earn points · Spend on prizes · Save for cash!</p>
+  </div>
+
+  <div class="balance-card">
+    <div class="balance-label">Points in the bank</div>
+    <div class="balance-number" id="balance">0.0</div>
+    <div class="balance-unit">pts</div>
+    <div class="balance-sub">
+      <div class="balance-sub-item">
+        <div class="lbl">Earned</div>
+        <div class="val" id="total-earned">0.0</div>
+      </div>
+      <div class="balance-sub-item">
+        <div class="lbl">Spent</div>
+        <div class="val" id="total-spent">0.0</div>
+      </div>
+      <div class="balance-sub-item">
+        <div class="lbl">Entries</div>
+        <div class="val" id="log-count">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="milestone-card">
+    <div class="milestone-title">💵 Cash Milestones — save your points!</div>
+    <div id="milestones"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header earn">✅ Earn Points</div>
+    <div class="btn-grid">
+      <button class="action-btn btn-earn" onclick="confirm_action('candy','Daily candy 🍬','Automatic dessert candy','earn',1)">
+        <span class="icon">🍬</span><span class="label">Daily candy</span><span class="pts">+1</span>
+      </button>
+      <button class="action-btn btn-earn" onclick="confirm_action('thumb','Thumb stamp 👍','No thumb sucking at school','earn',1)">
+        <span class="icon">👍</span><span class="label">Thumb stamp</span><span class="pts">+1</span>
+      </button>
+      <button class="action-btn btn-earn" onclick="confirm_action('teeth_n','Teeth – night 🌙','Remembered to brush teeth at night','earn',1)">
+        <span class="icon">🌙</span><span class="label">Teeth – night</span><span class="pts">+1</span>
+      </button>
+      <button class="action-btn btn-earn" onclick="confirm_action('teeth_m','Teeth – morning ☀️','Remembered to brush teeth in the morning','earn',1)">
+        <span class="icon">☀️</span><span class="label">Teeth – morning</span><span class="pts">+1</span>
+      </button>
+      <button class="action-btn btn-earn" onclick="confirm_action('bed_extra','Extra bed night 🛏️','Volunteered to sleep extra night in own bed','earn',2)">
+        <span class="icon">🛏️</span><span class="label">Extra bed night</span><span class="pts">+2</span>
+      </button>
+      <button class="action-btn btn-super" onclick="confirm_action('super','SUPER BONUS 🦸','No thumb sucking all day AND night!','earn',10)">
+        <span class="icon">🦸</span><span class="label">Super Bonus — no thumb sucking all day &amp; night!</span><span class="pts">+10 pts!</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header spend">🛍️ Spend Points</div>
+    <div class="btn-grid">
+      <button class="action-btn btn-spend" onclick="spend_action('candy_extra','Extra candy 🍬','Extra Halloween candy',1)">
+        <span class="icon">🍬</span><span class="label">Extra candy</span><span class="pts">1 pt</span>
+      </button>
+      <button class="action-btn btn-spend" onclick="spend_action('popcorn','Popcorn 🍿','Small bag of popcorn',2)">
+        <span class="icon">🍿</span><span class="label">Popcorn</span><span class="pts">2 pts</span>
+      </button>
+      <button class="action-btn btn-spend" onclick="spend_action('ice','Shaved ice 🧊','Shaved ice with flavor',2)">
+        <span class="icon">🧊</span><span class="label">Shaved ice</span><span class="pts">2 pts</span>
+      </button>
+      <button class="action-btn btn-spend" onclick="spend_action('bed','Dad\'s bed 🛏️','Bought out his-bed night',3)">
+        <span class="icon">😴</span><span class="label">Dad's bed</span><span class="pts">3 pts</span>
+      </button>
+      <button class="action-btn btn-spend" onclick="spend_action('feast','Feastable 🍫','Feastable chocolate bar',4)">
+        <span class="icon">🍫</span><span class="label">Feastable bar</span><span class="pts">4 pts</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header deduct">❌ Deductions</div>
+    <div class="btn-grid">
+      <button class="action-btn btn-deduct" onclick="confirm_action('remind_n','Reminded – night 😬','Dad had to remind about night brushing','deduct',-0.5)">
+        <span class="icon">😬</span><span class="label">Reminded – night</span><span class="pts">−0.5</span>
+      </button>
+      <button class="action-btn btn-deduct" onclick="confirm_action('remind_m','Reminded – morning 😬','Dad had to remind about morning brushing','deduct',-0.5)">
+        <span class="icon">😬</span><span class="label">Reminded – morning</span><span class="pts">−0.5</span>
+      </button>
+      <button class="action-btn btn-deduct" onclick="confirm_action('bed_exit','Out of bed 🚶','Got out of bed for non-bathroom reason','deduct',-0.5)">
+        <span class="icon">🚶</span><span class="label">Out of bed</span><span class="pts">−0.5</span>
+      </button>
+      <button class="action-btn btn-deduct" onclick="confirm_action('climb','Climbing 🛋️','Caught climbing over couch or chair railing','deduct',-1)">
+        <span class="icon">🛋️</span><span class="label">Furniture climbing</span><span class="pts">−1</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="log-section">
+    <div class="log-header">
+      📋 Recent Activity
+      <button class="log-clear" onclick="clear_log()">Reset all</button>
+    </div>
+    <div id="log-list"><div class="log-empty">No entries yet — start earning, Henry!</div></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon" id="modal-icon">⭐</div>
+    <h3 id="modal-title">Confirm</h3>
+    <p id="modal-desc">Are you sure?</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="close_modal()">Nope</button>
+      <button class="btn-confirm" onclick="do_action()">Yes!</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="confetti-wrap" id="confetti"></div>
+
+<script>
+const MILESTONES=[{pts:10,cash:'$5'},{pts:20,cash:'$12'},{pts:50,cash:'$30'},{pts:100,cash:'$100 🎉'}];
+const ICONS={candy:'🍬',thumb:'👍',teeth_n:'🌙',teeth_m:'☀️',bed_extra:'🛏️',super:'🦸',remind_n:'😬',remind_m:'😬',bed_exit:'🚶',climb:'🛋️',candy_extra:'🍬',popcorn:'🍿',ice:'🧊',bed:'😴',feast:'🍫'};
+let state={entries:[],totalEarned:0,totalSpent:0};
+let pending=null,toastTimer=null;
+
+function load(){
+  try{const r=localStorage.getItem('henry_v3');if(r)state=JSON.parse(r);}catch(e){}
+  render();
+}
+function save(){try{localStorage.setItem('henry_v3',JSON.stringify(state));}catch(e){}}
+function get_bal(){return Math.round((state.totalEarned-state.totalSpent)*10)/10;}
+function fmt(n){return Number(n).toFixed(1);}
+
+function render(){
+  const bal=get_bal();
+  document.getElementById('balance').textContent=fmt(bal);
+  document.getElementById('total-earned').textContent=fmt(state.totalEarned);
+  document.getElementById('total-spent').textContent=fmt(state.totalSpent);
+  document.getElementById('log-count').textContent=state.entries.length;
+  render_milestones(bal);
+  render_log();
+}
+
+function render_milestones(bal){
+  const el=document.getElementById('milestones');
+  el.innerHTML=MILESTONES.map((m,i)=>{
+    const reached=bal>=m.pts;
+    const isNext=!reached&&(i===0||bal>=MILESTONES[i-1].pts);
+    const dotClass=reached?'reached':isNext?'next':'';
+    return '<div class="milestone-row">'
+      +'<div class="milestone-dot '+dotClass+'">'+(reached?'✓':(i+1))+'</div>'
+      +'<div class="milestone-info">'
+        +'<div class="pts">'+m.pts+' pts → '+m.cash+'</div>'
+        +(reached
+          ?'<div class="reached-lbl">Reached! Tell Dad! 🎉</div>'
+          :'<div class="cash">'+Math.max(0,m.pts-bal).toFixed(1)+' pts to go</div>')
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function render_log(){
+  const el=document.getElementById('log-list');
+  if(!state.entries.length){el.innerHTML='<div class="log-empty">No entries yet — start earning, Henry!</div>';return;}
+  el.innerHTML=[...state.entries].reverse().slice(0,30).map(e=>{
+    const sign=e.type==='earn'?'+':'−';
+    return '<div class="log-entry entry-'+e.type+'">'
+      +'<div class="entry-icon">'+(ICONS[e.key]||'⭐')+'</div>'
+      +'<div class="entry-info">'
+        +'<div class="entry-desc">'+e.desc+'</div>'
+        +'<div class="entry-date">'+e.date+'</div>'
+      +'</div>'
+      +'<div class="entry-pts">'+sign+Math.abs(e.pts).toFixed(1)+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function confirm_action(key,title,desc,type,pts){
+  pending={key,title,desc,type,pts};
+  document.getElementById('modal-icon').textContent=ICONS[key]||'⭐';
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-desc').textContent=desc+'\n\nPoints: '+(type==='earn'?'+':'')+pts;
+  document.getElementById('modal').classList.add('show');
+}
+
+function spend_action(key,title,desc,cost){
+  const bal=get_bal();
+  if(bal<cost){show_toast('Need '+cost+' pts — Henry only has '+fmt(bal));return;}
+  pending={key,title,desc,type:'spend',pts:cost};
+  document.getElementById('modal-icon').textContent=ICONS[key]||'🛍️';
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-desc').textContent=desc+'\n\nCost: '+cost+' pts\nBalance after: '+fmt(bal-cost)+' pts';
+  document.getElementById('modal').classList.add('show');
+}
+
+function close_modal(){document.getElementById('modal').classList.remove('show');pending=null;}
+
+function do_action(){
+  if(!pending)return;
+  const{key,title,desc,type,pts}=pending;
+  const d=new Date();
+  const ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  state.entries.push({key,desc:title,date:ds,type,pts:Math.abs(pts)});
+  if(type==='earn') state.totalEarned=Math.round((state.totalEarned+Math.abs(pts))*10)/10;
+  else state.totalSpent=Math.round((state.totalSpent+Math.abs(pts))*10)/10;
+  save();
+  close_modal();
+  const bal=get_bal();
+  const balEl=document.getElementById('balance');
+  balEl.classList.add('pop');
+  setTimeout(()=>balEl.classList.remove('pop'),400);
+  render();
+  const just_hit=MILESTONES.filter(m=>bal>=m.pts&&(bal-Math.abs(pts))<m.pts);
+  if(just_hit.length){
+    const m=just_hit[just_hit.length-1];
+    show_toast('🎉 '+m.pts+' POINTS! Henry earns '+m.cash+'!');
+    celebrate();
+  } else if(type==='earn'){
+    const msgs=['+'+Math.abs(pts)+' pt! Great job, Henry!','Keep it up! ⭐','Amazing work!','You rock, Henry! 🌟'];
+    show_toast(msgs[Math.floor(Math.random()*msgs.length)]);
+  } else if(type==='spend'){
+    show_toast('Enjoy it, Henry! 😄');
+  } else {
+    show_toast('−'+Math.abs(pts)+' pts. Do better, Henry!');
+  }
+  pending=null;
+}
+
+function show_toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+function celebrate(){
+  const wrap=document.getElementById('confetti');
+  wrap.innerHTML='';
+  const colors=['#FFD700','#6A0DAD','#ff6b6b','#4ecdc4','#a8e063','#f7971e','#ff9ff3'];
+  for(let i=0;i<70;i++){
+    const c=document.createElement('div');
+    c.className='confetto';
+    c.style.cssText='left:'+Math.random()*100+'%;background:'+colors[Math.floor(Math.random()*colors.length)]+';animation-duration:'+(1.2+Math.random()*1.5)+'s;animation-delay:'+(Math.random()*0.6)+'s;border-radius:'+(Math.random()>.5?'50%':'2px');
+    wrap.appendChild(c);
+    setTimeout(()=>c.remove(),3500);
+  }
+}
+
+function clear_log(){
+  if(!confirm('Reset everything? This clears all points and history.'))return;
+  state={entries:[],totalEarned:0,totalSpent:0};
+  save();render();
+}
+
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)close_modal();});
+load();
+</script>
+</body>
+</html>
